@@ -7,7 +7,7 @@ ARG TARGET=cpu
 # ===============================================================================
 # Base stage (Common dependencies for CPU and NVIDIA GPU builds)
 # ===============================================================================
-FROM osrf/ros:humble-desktop-full-jammy AS base
+FROM ros:humble-ros-base-jammy AS base
 ARG USE_CI
 
 RUN apt-get update
