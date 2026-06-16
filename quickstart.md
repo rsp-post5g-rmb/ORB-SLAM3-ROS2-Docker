@@ -52,7 +52,7 @@ The compose file already grants USB/camera access (`privileged: true`,
 ### Verify RealSense is present (first run only)
 
 ```bash
-rs-enumerate-devices            # should list the D435  -> SDK + USB passthrough OK
+realsense-viewer                # Launch viewer
 ros2 pkg list | grep realsense  # realsense2_camera present -> ROS wrapper OK
 xeyes                           # a pair of eyes pops up -> X11 forwarding OK
 ```
