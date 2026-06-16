@@ -12,22 +12,58 @@ origin, and the camera pose is logged on `/robot_pose_slam` as the robot moves.
 
 ---
 
-## 0. One-time: install the RealSense ROS wrapper in the container
+## 0. Build and bring up the container
 
-The binary package is the least-friction option on Humble:
+RealSense (librealsense2 SDK + `ros-humble-realsense2-camera`) is baked into the
+image, so there's nothing to install manually — just build once and run.
+
+### One-time: build the image
+
+From the repo root (where the `Dockerfile` lives):
 
 ```bash
-sudo apt update && sudo apt install ros-humble-realsense2-camera
+# CPU
+sudo docker build --build-arg USE_CI=false -t orb-slam3-humble:22.04 .
+
+# or NVIDIA
+sudo docker build --build-arg USE_CI=false --build-arg TARGET=nvidia_gpu \
+  -t orb-slam3-humble-nvidia:22.04 .
 ```
 
-> If you instead build realsense-ros from source, do **not** run
-> `rosdep install --from-path src` over the whole workspace — it will choke on
-> the manually-installed `Sophus` / `Pangolin` keys used by the ORB packages.
-> Either scope rosdep to the realsense folder, or skip those keys:
+Enable X11 forwarding on the host (once) so the ORB-SLAM3 viewer can open:
+
+```bash
+echo "xhost +" >> ~/.bashrc && source ~/.bashrc
+```
+
+### Bring up the container
+
+```bash
+# CPU
+sudo docker compose run orb_slam3_22_humble
+
+# or NVIDIA
+sudo docker compose run orb_slam3_22_nvidia
+```
+
+The compose file already grants USB/camera access (`privileged: true`,
+`/dev:/dev`, `network_mode: host`, `ipc: host`) — no extra flags needed.
+
+### Verify RealSense is present (first run only)
+
+```bash
+rs-enumerate-devices            # should list the D435  -> SDK + USB passthrough OK
+ros2 pkg list | grep realsense  # realsense2_camera present -> ROS wrapper OK
+xeyes                           # a pair of eyes pops up -> X11 forwarding OK
+```
+
+> Opening a second shell into the same running container (e.g. one for the
+> camera, one for SLAM):
 > ```bash
-> rosdep install -i --from-path src --rosdistro $ROS_DISTRO \
->   --skip-keys "librealsense2 Sophus Pangolin" -y
+> sudo docker exec -it <container_id> bash
 > ```
+> Find `<container_id>` with `sudo docker ps`. Every shell should
+> `source /root/ros_env_vars.sh` so they share `ROS_DOMAIN_ID=55` + CycloneDDS.
 
 ---
 

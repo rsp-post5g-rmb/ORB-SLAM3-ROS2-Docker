@@ -57,6 +57,36 @@ RUN apt-get update && apt-get install ros-humble-pcl-ros tmux ros-humble-rviz2 -
 RUN apt-get install ros-humble-nav2-common x11-apps nano -y
 RUN apt-get install -y gdb gdbserver ros-humble-rmw-cyclonedds-cpp ros-humble-cv-bridge ros-humble-image-transport ros-humble-image-common ros-humble-vision-opencv
 
+# ===============================================================================
+# Intel RealSense SDK (librealsense2) + ROS 2 wrapper
+# Installed in the base stage so BOTH the CPU and NVIDIA images include it.
+#
+# NOTE: librealsense2-dkms is intentionally NOT installed. DKMS builds and loads
+# kernel modules against the *running* kernel, which cannot happen during
+# `docker build`, and its post-install hook can fail the build. A container does
+# not need it: librealsense's userspace RSUSB/libusb backend talks to the D435
+# directly, and USB access is granted by `privileged: true` + `/dev:/dev` in
+# docker-compose. If you ever want the kernel-side features (hardware
+# timestamps), install librealsense2-dkms on the HOST, not in this image.
+# ===============================================================================
+
+# --- librealsense2 userspace SDK from the RealSense apt server ---
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -sSf https://librealsense.realsenseai.com/Debian/librealsenseai.asc | \
+      gpg --dearmor | tee /etc/apt/keyrings/librealsenseai.gpg > /dev/null && \
+    echo "deb [signed-by=/etc/apt/keyrings/librealsenseai.gpg] https://librealsense.realsenseai.com/Debian/apt-repo $(lsb_release -cs) main" | \
+      tee /etc/apt/sources.list.d/librealsense.list && \
+    apt-get update && \
+    apt-get install -y \
+      librealsense2-utils \
+      librealsense2-dev
+
+# --- ROS 2 RealSense wrapper (packages.ros.org is already configured in the ros base image) ---
+RUN apt-get update && \
+    apt-get install -y \
+      ros-humble-realsense2-camera \
+      ros-humble-realsense2-description
+
 
 # ===============================================================================
 # NVIDIA GPU image stage (built if `--target nvidia_gpu` is specified)
