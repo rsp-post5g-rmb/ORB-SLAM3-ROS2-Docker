@@ -17,6 +17,12 @@ services:
   orb_slam3_22_humble:
     <<: *orb_slam3_common
     image: orb-slam3-humble:22.04
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TARGET: cpu
+        USE_CI: "false"
     volumes:
       #full dev
       - /dev:/dev:rw
@@ -36,6 +42,12 @@ services:
   orb_slam3_22_humble_nvidia:
     <<: *orb_slam3_common
     image: orb-slam3-humble-nvidia:22.04
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TARGET: nvidia_gpu
+        USE_CI: "false"
     volumes:
       #full dev
       - /dev:/dev:rw

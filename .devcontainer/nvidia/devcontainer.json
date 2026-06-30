@@ -1,0 +1,37 @@
+{
+  "name": "ORB-SLAM3 ROS 2 Humble (NVIDIA CUDA)",
+
+  // GPU variant: same Compose stack, but targets the nvidia service (FastTrack /
+  // CUDA tracking) and builds the wrapper with CUDA enabled. Requires the NVIDIA
+  // Container Toolkit on the host. Paths are relative to this file
+  // (.devcontainer/nvidia/), so the base compose lives two levels up.
+  "dockerComposeFile": [
+    "../../docker-compose.yml",
+    "../docker-compose.extend.yml"
+  ],
+  "service": "orb_slam3_22_humble_nvidia",
+  "workspaceFolder": "/root/colcon_ws",
+  "remoteUser": "root",
+
+  "overrideCommand": false,
+  "shutdownAction": "stopCompose",
+
+  // `cuda` arg => colcon build with -DORB_SLAM3_ROS2_WRAPPER_ENABLE_CUDA=ON.
+  "postCreateCommand": "bash /root/shell_scripts/build_workspace.sh cuda",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-iot.vscode-ros",
+        "ms-python.python",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+        "cmake.configureOnOpen": false
+      }
+    }
+  }
+}

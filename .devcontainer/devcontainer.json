@@ -1,0 +1,40 @@
+{
+  "name": "ORB-SLAM3 ROS 2 Humble (CPU)",
+
+  // Reuse the project's existing Compose stack, then layer the Dev Container
+  // override that keeps the container alive for the VS Code server. Because the
+  // Compose file is reused as-is, the privileged/host-network/X11 settings and
+  // all bind-mounts behave exactly like the manual `docker compose run` flow.
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.extend.yml"
+  ],
+  "service": "orb_slam3_22_humble",
+  "workspaceFolder": "/root/colcon_ws",
+  "remoteUser": "root",
+
+  // The Compose override already supplies a keep-alive entrypoint, so do not let
+  // the Dev Container CLI inject its own command.
+  "overrideCommand": false,
+  "shutdownAction": "stopCompose",
+
+  // Build ORB_SLAM3 + the colcon workspace once, after the container is created.
+  // First run is slow (~15-25 min); later opens reuse the --symlink-install build.
+  "postCreateCommand": "bash /root/shell_scripts/build_workspace.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-iot.vscode-ros",
+        "ms-python.python",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+        "cmake.configureOnOpen": false
+      }
+    }
+  }
+}

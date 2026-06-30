@@ -1,0 +1,18 @@
+# Dev Container override for ../docker-compose.yml
+#
+# Applied ONLY when the repo is opened as a Dev Container (see
+# .devcontainer/devcontainer.json and .devcontainer/nvidia/devcontainer.json).
+#
+# The base compose file sets `entrypoint: /bin/bash` so that `docker compose run`
+# drops you straight into a shell. A Dev Container attaches to an already-running
+# container instead of allocating an interactive TTY, so that bash entrypoint
+# would exit immediately and the container would stop. Here we replace it with a
+# keep-alive command that holds the container open for the VS Code server to
+# connect. Everything else (privileged, host networking, X11, the bind-mounts)
+# is inherited unchanged from the base file.
+services:
+  orb_slam3_22_humble:
+    entrypoint: ["sleep", "infinity"]
+
+  orb_slam3_22_humble_nvidia:
+    entrypoint: ["sleep", "infinity"]

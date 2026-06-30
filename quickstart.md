@@ -17,6 +17,13 @@ origin, and the camera pose is logged on `/robot_pose_slam` as the robot moves.
 RealSense (librealsense2 SDK + `ros-humble-realsense2-camera`) is baked into the
 image, so there's nothing to install manually — just build once and run.
 
+> **Using VS Code?** The easiest path is **Dev Containers: Reopen in Container**
+> (pick the CPU config), which builds the image and the workspace for you — see
+> [Quickstart with Dev Containers](README.md#quickstart-with-dev-containers-recommended)
+> in the README. The manual `docker build` / `docker compose run` steps below are
+> the equivalent command-line workflow; the in-container steps (sections 1+) are
+> the same either way.
+
 ### One-time: build the image
 
 From the repo root (where the `Dockerfile` lives):

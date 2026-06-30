@@ -13,7 +13,42 @@ Please use the `Release 1.0.0` version of this repository for the latest stable 
 
 ![ORBSLAM3-GIF](orbslam3.gif)
 
-# Building ORB_SLAM3
+# Quickstart with Dev Containers (recommended)
+
+If you use VS Code — or any editor that supports the [Dev Container spec](https://containers.dev) —
+the whole toolchain is wired up for you: the image build, the container run (with X11,
+USB and host networking), and the ORB-SLAM3 + colcon build all happen automatically.
+It reuses the same `Dockerfile` and `docker-compose.yml` as the manual flow below, so it
+is functionally identical — just automated.
+
+1. Clone **with submodules**:
+   ```bash
+   git clone https://github.com/suchetanrs/ORB-SLAM3-ROS2-Docker
+   cd ORB-SLAM3-ROS2-Docker
+   git submodule update --init --recursive --remote
+   ```
+2. Install [Docker](https://docs.docker.com/get-docker/) and the
+   [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+   for VS Code. For the GPU variant also install the
+   [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+3. Allow the in-container GUI (ORB-SLAM3 viewer / rviz) to reach your X server:
+   ```bash
+   echo "xhost +" >> ~/.bashrc && source ~/.bashrc
+   ```
+4. Open the folder in VS Code and run **Dev Containers: Reopen in Container** (`F1` /
+   Command Palette). When prompted, pick **ORB-SLAM3 ROS 2 Humble (CPU)**, or
+   **(NVIDIA CUDA)** for the GPU build.
+
+On first open the image is built and the `postCreateCommand` runs the full
+ORB-SLAM3 + colcon build (~15-25 min). After that, every new terminal already has the
+workspace sourced, so you can jump straight to [Launching ORB_SLAM3](#launching-orb_slam3).
+To rebuild after code changes, just run `bash /root/shell_scripts/build_workspace.sh`
+inside the container (it is incremental).
+
+> Prefer the command line, or don't use VS Code? The manual Docker workflow below
+> still works and is fully supported.
+
+# Building ORB_SLAM3 (manual Docker workflow)
 
 ## 1. Clone this repository
 
