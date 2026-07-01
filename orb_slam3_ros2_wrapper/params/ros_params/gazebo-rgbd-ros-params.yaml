@@ -8,12 +8,13 @@ ORB_SLAM3_RGBD_ROS2:
     robot_base_frame: base_footprint
     global_frame: map
     odom_frame: odom
-    rgb_image_topic_name: /camera/camera/color/image_raw
-    depth_image_topic_name: /camera/camera/aligned_depth_to_color/image_raw
+    rgb_image_topic_name: /camera/front_camera/color/image_raw
+    depth_image_topic_name: /camera/front_camera/aligned_depth_to_color/image_raw
 
     # the below parameters are used to adjust the initial pose with respect to the map. 
     # the camera pose maybe translated and rotated with respect to the base_footprint. The wrapper publishes map->base_footprint. Hence this relative transform needs to be accounted.
     # the below transform is the transform from base_footpring -> camera_link
+    # TODO(dhanush): fix.
     robot_x: 0.7
     robot_y: 0.0
     robot_z: 1.150

@@ -114,6 +114,7 @@ ORB-SLAM3 RGBD requires depth **registered to the color frame**.
 
 ```bash
 ros2 launch realsense2_camera rs_launch.py \
+  camera_name:=front_camera
   align_depth.enable:=true \
   enable_sync:=true \
   rgb_camera.color_profile:=640x480x30 \
