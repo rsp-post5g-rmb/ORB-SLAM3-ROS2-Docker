@@ -14,7 +14,8 @@ ORB_SLAM3_RGBD_ROS2:
     # the below parameters are used to adjust the initial pose with respect to the map. 
     # the camera pose maybe translated and rotated with respect to the base_footprint. The wrapper publishes map->base_footprint. Hence this relative transform needs to be accounted.
     # the below transform is the transform from base_footpring -> camera_link
-    # TODO(dhanush): fix.
+    # TODO(dhanush): perform extrinsic calibration T_{robot_base}_{camera}
+    # TODO(dhanush); I assume here the camera frame is already rotated to follow ROS-convetion. Verify!
     robot_x: 0.7
     robot_y: 0.0
     robot_z: 1.150
