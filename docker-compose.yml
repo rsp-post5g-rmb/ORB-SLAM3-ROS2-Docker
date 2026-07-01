@@ -1,5 +1,3 @@
-version: "3"
-
 x-orb-slam3-common: &orb_slam3_common
     privileged: true
     network_mode: host

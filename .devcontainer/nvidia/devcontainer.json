@@ -10,6 +10,10 @@
     "../docker-compose.extend.yml"
   ],
   "service": "orb_slam3_22_humble_nvidia",
+
+  // Start ONLY the NVIDIA service (mirror of the CPU config's runServices), so
+  // Compose doesn't also try to bring up the other service.
+  "runServices": ["orb_slam3_22_humble_nvidia"],
   "workspaceFolder": "/root/colcon_ws",
   "remoteUser": "root",
 

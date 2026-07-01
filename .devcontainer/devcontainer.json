@@ -10,6 +10,12 @@
     "docker-compose.extend.yml"
   ],
   "service": "orb_slam3_22_humble",
+
+  // Start ONLY the CPU service. Without this, `docker compose up` starts every
+  // service in the file, including orb_slam3_22_humble_nvidia (runtime: nvidia),
+  // which fails with "unknown or invalid runtime name: nvidia" on hosts without
+  // the NVIDIA Container Toolkit.
+  "runServices": ["orb_slam3_22_humble"],
   "workspaceFolder": "/root/colcon_ws",
   "remoteUser": "root",
 
