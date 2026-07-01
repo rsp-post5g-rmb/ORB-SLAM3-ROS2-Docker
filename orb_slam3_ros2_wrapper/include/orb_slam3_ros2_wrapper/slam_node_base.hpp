@@ -68,6 +68,10 @@ namespace ORB_SLAM3_Wrapper
                                std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
+        void resetMappingPoseSrv(std::shared_ptr<rmw_request_id_t> request_header,
+                                 std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                 std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+
         void getMapServer(std::shared_ptr<rmw_request_id_t> request_header,
                           std::shared_ptr<slam_msgs::srv::GetMap::Request> request,
                           std::shared_ptr<slam_msgs::srv::GetMap::Response> response);
@@ -98,6 +102,7 @@ namespace ORB_SLAM3_Wrapper
         rclcpp::Service<slam_msgs::srv::GetLandmarksInView>::SharedPtr getMapPointsService_;
         rclcpp::Service<slam_msgs::srv::GetAllLandmarksInMap>::SharedPtr mapPointsService_;
         rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr resetLocalMapSrv_;
+        rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr resetMappingPoseSrv_;
         rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr saveMapService_;
         // ROS Timers
         rclcpp::TimerBase::SharedPtr mapDataTimer_;

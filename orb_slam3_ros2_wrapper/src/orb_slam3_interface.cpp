@@ -364,6 +364,25 @@ namespace ORB_SLAM3_Wrapper
         mapReferencesMutex_.unlock();
     };
 
+    void ORBSLAM3Interface::resetMappingPose()
+    {
+        // Same lock order as correctTrackedPose(): latestTrackedPoseMutex_ then mapReferencesMutex_.
+        std::lock_guard<std::mutex> lock(latestTrackedPoseMutex_);
+        mSLAM_->Reset(); // full atlas + tracking reset (vs ResetActiveMap in resetLocalMapping)
+        mapReferencesMutex_.lock();
+        mapReferencePoses_.clear();
+        // KEY difference vs resetLocalMapping: do NOT carry the last pose over. With no
+        // override, the next map's reference falls back to its origin KF (~identity), so
+        // the published pose restarts at the origin like a fresh launch.
+        mapReferencePosesOverrides_.clear();
+        allKFs_.clear();
+        mapReferencesMutex_.unlock();
+        // Zero the cached pose so we don't publish the stale one during the re-init gap.
+        latestTrackedPose_ = Eigen::Affine3f::Identity();
+        latestTrackedPoseORB_camera_ = Eigen::Affine3f::Identity();
+        hasTracked_ = false;
+    };
+
     void ORBSLAM3Interface::getDirectMapToRobotTF(std_msgs::msg::Header headerToUse, geometry_msgs::msg::TransformStamped &tf)
     {
         if (hasTracked_)

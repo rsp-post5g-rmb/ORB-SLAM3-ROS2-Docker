@@ -109,6 +109,14 @@ namespace ORB_SLAM3_Wrapper
 
         void resetLocalMapping();
 
+        /**
+         * @brief Full "fresh launch" reset: wipes the whole atlas and returns the
+         * published pose to the origin. Unlike resetLocalMapping(), it clears the
+         * reference-pose overrides (so the new map's origin is NOT carried over)
+         * and zeroes the cached pose.
+         */
+        void resetMappingPose();
+
         void saveAtlas()
         {
             mSLAM_->SaveAtlas(ORB_SLAM3::System::FileType::BINARY_FILE);

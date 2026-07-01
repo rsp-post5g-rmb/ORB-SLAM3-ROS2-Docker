@@ -53,6 +53,7 @@ namespace ORB_SLAM3_Wrapper
         mapPointsCallbackGroup_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
         mapPointsService_ = this->create_service<slam_msgs::srv::GetAllLandmarksInMap>("orb_slam3/get_all_landmarks_in_map", std::bind(&SlamNodeBase::publishMapPointCloud, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), rmw_qos_profile_services_default, mapPointsCallbackGroup_);
         resetLocalMapSrv_ = this->create_service<std_srvs::srv::SetBool>("orb_slam3/reset_mapping", std::bind(&SlamNodeBase::resetActiveMapSrv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), rmw_qos_profile_services_default, mapPointsCallbackGroup_);
+        resetMappingPoseSrv_ = this->create_service<std_srvs::srv::SetBool>("orb_slam3/reset_mapping_pose", std::bind(&SlamNodeBase::resetMappingPoseSrv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), rmw_qos_profile_services_default, mapPointsCallbackGroup_);
         saveMapService_ = this->create_service<std_srvs::srv::SetBool>("orb_slam3/save_map", std::bind(&SlamNodeBase::saveMapSrv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), rmw_qos_profile_services_default, mapPointsCallbackGroup_);
 
         // TF
@@ -216,6 +217,15 @@ namespace ORB_SLAM3_Wrapper
                                          std::shared_ptr<std_srvs::srv::SetBool::Response> /*response*/)
     {
         interface_->resetLocalMapping();
+    }
+
+    void SlamNodeBase::resetMappingPoseSrv(std::shared_ptr<rmw_request_id_t> /*request_header*/,
+                                           std::shared_ptr<std_srvs::srv::SetBool::Request> /*request*/,
+                                           std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+    {
+        interface_->resetMappingPose();
+        response->success = true;
+        response->message = "Reset mapping and pose to origin (fresh-launch state).";
     }
 
     void SlamNodeBase::publishMapData()
