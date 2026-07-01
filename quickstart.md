@@ -14,10 +14,26 @@ origin, and the camera pose is logged on `/robot_pose_slam` as the robot moves.
 
 ## 0. Build and bring up the container
 
-RealSense (librealsense2 SDK + `ros-humble-realsense2-camera`) is baked into the
-image, so there's nothing to install manually — just build once and run.
+RealSense (librealsense2 SDK + `ros-humble-realsense2-camera`) and all build
+dependencies are baked into the image, so there's nothing to `apt install` by
+hand. But the image is built with `USE_CI=false`, so **ORB-SLAM3 and the colcon
+workspace are not pre-compiled** — you build them once inside the container (see
+"build ORB-SLAM3 + the workspace" below). That build persists on the host via
+bind mounts, so it's a one-time cost.
 
-### One-time: build the image
+Order: run the **host** steps first, then start the container, then build the
+workspace **inside** it.
+
+### One-time (host): fetch the ORB-SLAM3 submodules
+
+`ORB_SLAM3` and `FastTrack` are git submodules that are empty on a fresh clone.
+From the repo root:
+
+```bash
+git submodule update --init --recursive
+```
+
+### One-time (host): build the image
 
 From the repo root (where the `Dockerfile` lives):
 
@@ -43,11 +59,35 @@ echo "xhost +" >> ~/.bashrc && source ~/.bashrc
 sudo docker compose run orb_slam3_22_humble
 
 # or NVIDIA
-sudo docker compose run orb_slam3_22_nvidia
+sudo docker compose run orb_slam3_22_humble_nvidia
 ```
 
 The compose file already grants USB/camera access (`privileged: true`,
-`/dev:/dev`, `network_mode: host`, `ipc: host`) — no extra flags needed.
+`/dev:/dev`, `network_mode: host`, `ipc: host`) — no extra flags needed. Every
+new shell auto-sources ROS 2, the workspace, and `ros_env_vars.sh`
+(`ROS_DOMAIN_ID=55` + CycloneDDS) through `~/.bashrc`.
+
+### One-time (in container): build ORB-SLAM3 + the workspace (~15-25 min)
+
+The image ships no compiled workspace, so build it once now:
+
+```bash
+# 1) ORB-SLAM3 Thirdparty (DBoW2, g2o, Sophus) + vocabulary + the library.
+#    Run from this directory exactly — build.sh uses relative paths.
+cd /home/orb/ORB_SLAM3
+./build.sh
+
+# 2) the ROS 2 wrapper packages
+cd /root/colcon_ws
+colcon build --symlink-install
+source install/setup.bash
+```
+
+> Skipping this is the #1 cause of `package 'orb_slam3_ros2_wrapper' not found`
+> at launch: the wrapper's CMake does `find_package(Sophus)` and
+> `find_package(ORB_SLAM3)`, both of which step 1 provides. If step 2 already
+> failed for this reason, clear the stale attempt first:
+> `rm -rf /root/colcon_ws/{build,install}/orb_slam3_ros2_wrapper` then rebuild.
 
 ### Verify RealSense is present (first run only)
 
@@ -62,8 +102,9 @@ xeyes                           # a pair of eyes pops up -> X11 forwarding OK
 > ```bash
 > sudo docker exec -it <container_id> bash
 > ```
-> Find `<container_id>` with `sudo docker ps`. Every shell should
-> `source /root/ros_env_vars.sh` so they share `ROS_DOMAIN_ID=55` + CycloneDDS.
+> Find `<container_id>` with `sudo docker ps`. Each new shell auto-sources
+> `ros_env_vars.sh` via `~/.bashrc`, so they already share `ROS_DOMAIN_ID=55` +
+> CycloneDDS — no manual `source` needed.
 
 ---
 
@@ -212,7 +253,8 @@ ORB_SLAM3_RGBD_ROS2:
 
 ## 4. Launch SLAM
 
-Workspace was built with `--symlink-install`, so YAML edits are live — no rebuild.
+Because the workspace was built with `--symlink-install` in Step 0, YAML edits are
+live — no rebuild needed.
 
 ```bash
 cd /root/colcon_ws
@@ -228,7 +270,15 @@ the camera trajectory.
 
 ## 5. Verify pose output
 
-New terminal, same domain:
+In a new shell **inside this container** (already on domain 55 + CycloneDDS via
+`~/.bashrc`):
+
+```bash
+ros2 topic echo /robot_pose_slam
+```
+
+From a **different container** (e.g. another ROS 2 stack that should consume the
+pose), it must match the DDS settings to see the topic:
 
 ```bash
 export ROS_DOMAIN_ID=55
@@ -271,6 +321,8 @@ ros2 bag record -o slam_run1 /robot_pose_slam /tf /slam_info
 
 | Symptom | Likely cause / fix |
 |---------|--------------------|
+| `package 'orb_slam3_ros2_wrapper' not found` at launch | Workspace not built. Run Step 0's build: `/home/orb/ORB_SLAM3/build.sh`, then `colcon build --symlink-install` in `/root/colcon_ws`. |
+| `find_package(Sophus)` / `find_package(ORB_SLAM3)` CMake error | Same cause — ORB-SLAM3 `build.sh` hasn't run, so Thirdparty libs aren't installed. Run it before `colcon build`. |
 | Stuck on "waiting for images" | DDS mismatch — driver and SLAM must share `ROS_DOMAIN_ID=55` + CycloneDDS. Verify with `ros2 topic list`. |
 | "Tracking LOST" frequently | Feature-poor scene (blank walls/floor). Raise `ORBextractor.nFeatures`, add texture, move slower. |
 | Won't initialize | Depth scale mismatch — confirm encoding is `16UC1` and `DepthMapFactor: 1000.0`. |
