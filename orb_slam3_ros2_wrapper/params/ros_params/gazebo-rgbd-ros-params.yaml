@@ -16,13 +16,13 @@ ORB_SLAM3_RGBD_ROS2:
     # the below transform is the transform from base_footpring -> camera_link
     # TODO(dhanush): perform extrinsic calibration T_{robot_base}_{camera}
     # TODO(dhanush); I assume here the camera frame is already rotated to follow ROS-convetion. Verify!
-    robot_x: 0.7
+    robot_x: 0.255
     robot_y: 0.0
-    robot_z: 1.150
+    robot_z: 0.0
     robot_qx: 0.0
     robot_qy: 0.0
-    robot_qz: 0.0
-    robot_qw: 1.0
+    robot_qz: -0.7071068
+    robot_qw: +0.7071068
 
     visualization: false
     odometry_mode: false
